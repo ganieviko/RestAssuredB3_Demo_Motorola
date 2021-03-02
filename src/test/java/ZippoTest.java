@@ -119,4 +119,19 @@ public class ZippoTest {
         ;
     }
 
+    @Test
+    public void pathParameterTest() {
+        String country = "us";
+        String zipCode = "11214";
+        given()
+                .pathParam("country", country)
+                .pathParam("zipCode", zipCode)
+                .when()
+                .get("/{country}/{zipCode}")
+                .then()
+                .log().body()
+                .body("places[0].'place name'", equalTo("Brooklyn"))
+        ;
+    }
+
 }
