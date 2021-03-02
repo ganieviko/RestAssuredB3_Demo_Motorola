@@ -19,7 +19,7 @@ public class GoRestUsersTest {
     public void creatingUser() {
         Map<String, String> body = new HashMap<>();
         body.put("name", "Techno user");
-        body.put("email", "Floy_OKon13@yahoo.com");
+        body.put("email", "Floy_OKon15@yahoo.com");
         body.put("gender", "Female");
         body.put("status", "Active");
 
@@ -36,5 +36,16 @@ public class GoRestUsersTest {
                 .extract().path("data.id");
 
         System.out.println(id);
+
+        given()
+                .when()
+                .get("/" + id)
+                .then()
+                .log().body()
+                .body("data.name", equalTo(body.get("name")))
+                .body("data.email", equalTo(body.get("email")))
+                .body("data.gender", equalTo(body.get("gender")))
+                .body("data.status", equalTo(body.get("status")))
+        ;
     }
 }
