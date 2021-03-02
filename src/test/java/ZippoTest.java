@@ -134,4 +134,19 @@ public class ZippoTest {
         ;
     }
 
+    @Test
+    public void queryParameterTest() {
+        String name = "Gurdev";
+        String gender = "Female";
+        given()
+                .log().uri()
+                .param("name", name)
+                .param("gender", gender)
+                .when()
+                .get("https://gorest.co.in/public-api/users")
+                .then()
+        .log().body()
+        ;
+    }
+
 }
