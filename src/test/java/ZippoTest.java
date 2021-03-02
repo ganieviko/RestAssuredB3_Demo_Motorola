@@ -159,4 +159,19 @@ public class ZippoTest {
         System.out.println(country);
     }
 
+    @Test
+    public void extractingValueTest2() {
+        Object secondPlaceName = given()
+                .when()
+                .get("/tr/34840")
+                .then()
+                .log().body()
+                .body("places", hasSize(2))
+                .body("places.state", hasSize(2)) // {"İstanbul", "İstanbul"}
+                .body("places.'place name'", hasItem("Altintepe Mah.")) // {"Küçükyalimerkez Mah.", "Altintepe Mah."}
+                .extract().path("places[1].'place name'");
+        ;
+
+        System.out.println(secondPlaceName);
+    }
 }
