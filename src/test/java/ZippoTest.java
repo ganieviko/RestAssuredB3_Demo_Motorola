@@ -149,4 +149,14 @@ public class ZippoTest {
         ;
     }
 
+    @Test
+    public void extractingValueTest() {
+        Object country = given()
+                .when()
+                .get("/us/11214")
+                .then()
+                .extract().path("country");
+        System.out.println(country);
+    }
+
 }
