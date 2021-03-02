@@ -61,4 +61,17 @@ public class ZippoTest {
             .contentType(ContentType.JSON)
         ;
     }
+
+    @Test
+    public void checkCountryTest() {
+        given()
+                .when()
+                .get("http://api.zippopotam.us/us/90210")
+                .then()
+                .body("country", equalTo("United States"))
+                .body("'country abbreviation'", equalTo("US"))
+                .log().body()
+        ;
+    }
+
 }
