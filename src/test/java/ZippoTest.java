@@ -18,4 +18,14 @@ public class ZippoTest {
                 .statusCode(200)
         ;
     }
+
+    @Test
+    public void loggingRequest() {
+        given()
+                .log().all()
+                .when()
+                .get("http://api.zippopotam.us/us/90210")
+                .then()
+        ;
+    }
 }
