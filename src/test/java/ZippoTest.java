@@ -1,3 +1,4 @@
+import io.restassured.http.ContentType;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.*;
@@ -47,6 +48,17 @@ public class ZippoTest {
                 .get("http://api.zippopotam.us/us/90210")
                 .then()
                 .log().all()
+        ;
+    }
+
+    @Test
+    public void testingContentType() {
+        given()
+                .when()
+                .get("http://api.zippopotam.us/us/90210")
+                .then()
+//        .contentType("application/json")
+            .contentType(ContentType.JSON)
         ;
     }
 }
