@@ -1,10 +1,18 @@
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
 public class ZippoTest {
+    @BeforeClass
+    public void setUp() {
+        RestAssured.baseURI = "http://api.zippopotam.us";
+    }
+
+
     @Test
     public void test() {
         given().when().then();
@@ -14,7 +22,7 @@ public class ZippoTest {
     public void testingStatusCode() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
                 .statusCode(200)
         ;
@@ -25,7 +33,7 @@ public class ZippoTest {
         given()
                 .log().all()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
         ;
     }
@@ -34,7 +42,7 @@ public class ZippoTest {
     public void loggingResponse() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
                 .log().all()
         ;
@@ -45,7 +53,7 @@ public class ZippoTest {
         given()
                 .log().all()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
                 .log().all()
         ;
@@ -55,7 +63,7 @@ public class ZippoTest {
     public void testingContentType() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
 //        .contentType("application/json")
             .contentType(ContentType.JSON)
@@ -66,7 +74,7 @@ public class ZippoTest {
     public void checkCountryTest() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
                 .body("country", equalTo("United States"))
                 .body("'country abbreviation'", equalTo("US"))
@@ -78,7 +86,7 @@ public class ZippoTest {
     public void checkPlacesTest() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/us/90210")
+                .get("/us/90210")
                 .then()
                 .log().body()
                 .body("places", hasSize(1))
@@ -91,7 +99,7 @@ public class ZippoTest {
     public void checkArtursTest() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/us/11214")
+                .get("/us/11214")
                 .then()
                 .log().body()
                 .body("places[0].'place name'", equalTo("Brooklyn"))
@@ -102,7 +110,7 @@ public class ZippoTest {
     public void checkTurkeyTest() {
         given()
                 .when()
-                .get("http://api.zippopotam.us/tr/34840")
+                .get("/tr/34840")
                 .then()
                 .log().body()
                 .body("places", hasSize(2))
