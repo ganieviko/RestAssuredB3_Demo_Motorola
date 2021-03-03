@@ -11,6 +11,10 @@ import java.util.Map;
 import java.util.Random;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 
 public class CampusCountryTest {
 
@@ -65,10 +69,15 @@ public class CampusCountryTest {
                 .post("/school-service/api/countries")
                 .then()
                 .log().body()
-                .statusCode(400) // extra assertion
-        ;
+                .statusCode(400)
+//                .body("message", equalTo("The Country with Name \""+country.get("name") +"\" already exists."))
+                .body("message", allOf(
+                        not(empty()),
+                        containsString(country.get("name")),
+                        containsString("already exists"))
+                );
 
-        // extra assertion
+
     }
 
     @AfterClass
