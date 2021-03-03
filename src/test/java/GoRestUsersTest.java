@@ -3,8 +3,10 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import pojo.GoRestUser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,7 @@ public class GoRestUsersTest {
 
     private RequestSpecification givenReqSpec;
     private ResponseSpecification defaultTestsForResponse;
-    private Map<String, String> body;
+    private GoRestUser body;
     private Object id;
 
     @BeforeClass
@@ -30,11 +32,11 @@ public class GoRestUsersTest {
 
         defaultTestsForResponse = given().then().log().body().statusCode(200).contentType(ContentType.JSON);
 
-        body = new HashMap<>();
-        body.put("name", "Techno user");
-        body.put("email", "F2loy_"+new Random().nextInt(100)+"OKon15@yahoo.com");
-        body.put("gender", "Female");
-        body.put("status", "Active");
+        body = new GoRestUser();
+        body.setName("Techno user");
+        body.setEmail("F2loy_"+new Random().nextInt(100)+"OKon15@yahoo.com");
+        body.setGender("Female");
+        body.setStatus("Active");
     }
 
     @Test
@@ -65,16 +67,18 @@ public class GoRestUsersTest {
 
     @Test(dependsOnMethods = "creatingUser")
     public void gettingUser() {
-        given()
+        GoRestUser user = given()
                 .when()
                 .get("/" + id)
                 .then()
                 .spec(defaultTestsForResponse)
-                .body("data.name", equalTo(body.get("name")))
-                .body("data.email", equalTo(body.get("email")))
-                .body("data.gender", equalTo(body.get("gender")))
-                .body("data.status", equalTo(body.get("status")))
-        ;
+                .extract()
+                .jsonPath().getObject("data", GoRestUser.class);
+
+        Assert.assertEquals(body.getName(), user.getName());
+        Assert.assertEquals(body.getEmail(), user.getEmail());
+        Assert.assertEquals(body.getGender(), user.getGender());
+        Assert.assertEquals(body.getStatus(), user.getStatus());
     }
 
     @Test(dependsOnMethods = "gettingUser")
