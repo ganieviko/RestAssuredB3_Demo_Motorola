@@ -2,17 +2,20 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
 import io.restassured.response.ValidatableResponse;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 
 public class CampusCountryTest {
 
     private Cookies cookies;
+    private String id;
 
     @BeforeClass
     public void setUp() {
@@ -39,7 +42,7 @@ public class CampusCountryTest {
     @Test(dependsOnMethods = "login")
     public void createCountry() {
         Map<String, String> country = new HashMap<>();
-        country.put("name", "New country 1");
+        country.put("name", "New country " + new Random().nextInt(500));
 
         ValidatableResponse response = given()
                 .cookies(cookies)
@@ -49,6 +52,17 @@ public class CampusCountryTest {
                 .post("/school-service/api/countries")
                 .then();
 
-        response.statusCode(201).log().body();
+        id = response.statusCode(201).extract().jsonPath().getString("id");
+    }
+
+    @AfterClass
+    public void cleanup() {
+        given()
+                .cookies(cookies)
+                .when()
+                .delete("/school-service/api/countries/" + id)
+                .then()
+                .statusCode(200)
+        ;
     }
 }
