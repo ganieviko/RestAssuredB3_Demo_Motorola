@@ -1,5 +1,6 @@
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,10 +24,14 @@ public class GoRestUsersTest {
         body.put("gender", "Female");
         body.put("status", "Active");
 
-        Object id = given()
+
+        RequestSpecification givenReqSpec = given()
                 .log().uri()
                 .header("Authorization", "Bearer 55b19d86844d95532f80c9a2103e1a3af0aea11b96817e6a1861b0d6532eef47")
-                .contentType(ContentType.JSON)
+                .contentType(ContentType.JSON);
+
+        Object id = given()
+                .spec(givenReqSpec)
                 .body(body)
                 .when()
                 .post()
@@ -35,7 +40,15 @@ public class GoRestUsersTest {
                 .body("code", equalTo(201))
                 .extract().path("data.id");
 
-        System.out.println(id);
+        // test duplication
+        given()
+                .spec(givenReqSpec)
+                .body(body)
+                .when()
+                .post()
+                .then()
+                .log().body()
+                .body("code", equalTo(422));
 
         given()
                 .when()
