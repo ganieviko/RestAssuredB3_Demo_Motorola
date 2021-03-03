@@ -20,7 +20,7 @@ public class GoRestUsersTest {
     private RequestSpecification givenReqSpec;
     private ResponseSpecification defaultTestsForResponse;
     private GoRestUser body;
-    private Object id;
+    private String id;
 
     @BeforeClass
     public void setUp() {
@@ -49,7 +49,7 @@ public class GoRestUsersTest {
                 .then()
                 .spec(defaultTestsForResponse)
                 .body("code", equalTo(201))
-                .extract().path("data.id");
+                .extract().jsonPath().getString("data.id");
     }
 
     @Test(dependsOnMethods = "creatingUser")
