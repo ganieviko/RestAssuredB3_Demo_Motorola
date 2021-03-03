@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -31,7 +32,7 @@ public class GoRestUsersTest {
 
         body = new HashMap<>();
         body.put("name", "Techno user");
-        body.put("email", "F2loy_OKon15@yahoo.com");
+        body.put("email", "F2loy_"+new Random().nextInt(100)+"OKon15@yahoo.com");
         body.put("gender", "Female");
         body.put("status", "Active");
     }
@@ -78,4 +79,19 @@ public class GoRestUsersTest {
                 .body("data.status", equalTo(body.get("status")))
         ;
     }
+
+    @Test(dependsOnMethods = "gettingUser")
+    public void deletingUser() {
+        given()
+                .spec(givenReqSpec)
+                .when()
+                .delete("/" + id)
+                .then()
+                .log().body()
+                .spec(defaultTestsForResponse)
+                .body("code", equalTo(204));
+        ;
+    }
+
+
 }
