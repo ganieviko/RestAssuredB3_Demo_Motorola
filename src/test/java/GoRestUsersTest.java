@@ -13,31 +13,32 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 public class GoRestUsersTest {
+
+    private RequestSpecification givenReqSpec;
+    private ResponseSpecification defaultTestsForResponse;
+    private Map<String, String> body;
+    private Object id;
+
     @BeforeClass
     public void setUp() {
         RestAssured.baseURI = "https://gorest.co.in/public-api/users";
-    }
-
-    @Test
-    public void creatingUser() {
-        Map<String, String> body = new HashMap<>();
-        body.put("name", "Techno user");
-        body.put("email", "Floy_OKon15@yahoo.com");
-        body.put("gender", "Female");
-        body.put("status", "Active");
-
-
-        RequestSpecification givenReqSpec = given()
+        givenReqSpec = given()
                 .log().uri()
                 .header("Authorization", "Bearer 55b19d86844d95532f80c9a2103e1a3af0aea11b96817e6a1861b0d6532eef47")
                 .contentType(ContentType.JSON);
 
-        ResponseSpecification defaultTestsForResponse = new ResponseSpecBuilder()
-                .expectStatusCode(200)
-                .expectContentType(ContentType.JSON)
-                .build();
+        defaultTestsForResponse = given().then().statusCode(200).contentType(ContentType.JSON);
 
-        Object id = given()
+        body = new HashMap<>();
+        body.put("name", "Techno user");
+        body.put("email", "F2loy_OKon15@yahoo.com");
+        body.put("gender", "Female");
+        body.put("status", "Active");
+    }
+
+    @Test
+    public void creatingUser() {
+        id = given()
                 .spec(givenReqSpec)
                 .body(body)
                 .when()
@@ -47,7 +48,10 @@ public class GoRestUsersTest {
                 .spec(defaultTestsForResponse)
                 .body("code", equalTo(201))
                 .extract().path("data.id");
+    }
 
+    @Test(dependsOnMethods = "creatingUser")
+    public void creatingDuplicateUser() {
         // test duplication
         given()
                 .spec(givenReqSpec)
@@ -58,7 +62,10 @@ public class GoRestUsersTest {
                 .log().body()
                 .spec(defaultTestsForResponse)
                 .body("code", equalTo(422));
+    }
 
+    @Test(dependsOnMethods = "creatingUser")
+    public void gettingUser() {
         given()
                 .when()
                 .get("/" + id)
