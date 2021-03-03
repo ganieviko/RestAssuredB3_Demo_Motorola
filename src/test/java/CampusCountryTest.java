@@ -16,10 +16,13 @@ public class CampusCountryTest {
 
     private Cookies cookies;
     private String id;
+    private Map<String, String> country;
 
     @BeforeClass
     public void setUp() {
         RestAssured.baseURI = "https://test.campus.techno.study";
+        country = new HashMap<>();
+        country.put("name", "New country " + new Random().nextInt(500));
     }
 
     @Test
@@ -41,9 +44,6 @@ public class CampusCountryTest {
 
     @Test(dependsOnMethods = "login")
     public void createCountry() {
-        Map<String, String> country = new HashMap<>();
-        country.put("name", "New country " + new Random().nextInt(500));
-
         ValidatableResponse response = given()
                 .cookies(cookies)
                 .body(country)
@@ -53,6 +53,22 @@ public class CampusCountryTest {
                 .then();
 
         id = response.statusCode(201).extract().jsonPath().getString("id");
+    }
+
+    @Test(dependsOnMethods = "createCountry")
+    public void duplicateCountry() {
+        given()
+                .cookies(cookies)
+                .body(country)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/school-service/api/countries")
+                .then()
+                .log().body()
+                .statusCode(400) // extra assertion
+        ;
+
+        // extra assertion
     }
 
     @AfterClass
