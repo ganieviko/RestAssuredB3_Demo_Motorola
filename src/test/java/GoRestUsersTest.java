@@ -28,7 +28,7 @@ public class GoRestUsersTest {
                 .header("Authorization", "Bearer 55b19d86844d95532f80c9a2103e1a3af0aea11b96817e6a1861b0d6532eef47")
                 .contentType(ContentType.JSON);
 
-        defaultTestsForResponse = given().then().statusCode(200).contentType(ContentType.JSON);
+        defaultTestsForResponse = given().then().log().body().statusCode(200).contentType(ContentType.JSON);
 
         body = new HashMap<>();
         body.put("name", "Techno user");
@@ -45,7 +45,6 @@ public class GoRestUsersTest {
                 .when()
                 .post()
                 .then()
-                .log().body()
                 .spec(defaultTestsForResponse)
                 .body("code", equalTo(201))
                 .extract().path("data.id");
@@ -60,7 +59,6 @@ public class GoRestUsersTest {
                 .when()
                 .post()
                 .then()
-                .log().body()
                 .spec(defaultTestsForResponse)
                 .body("code", equalTo(422));
     }
@@ -71,7 +69,6 @@ public class GoRestUsersTest {
                 .when()
                 .get("/" + id)
                 .then()
-                .log().body()
                 .spec(defaultTestsForResponse)
                 .body("data.name", equalTo(body.get("name")))
                 .body("data.email", equalTo(body.get("email")))
@@ -81,13 +78,28 @@ public class GoRestUsersTest {
     }
 
     @Test(dependsOnMethods = "gettingUser")
+    public void updatingUser() {
+        // test duplication
+        String updatedName = "New Name";
+        given()
+                .spec(givenReqSpec)
+                .body("{\"name\" : \""+updatedName+"\"}")
+                .when()
+                .put("/" + id)
+                .then()
+                .spec(defaultTestsForResponse)
+                .body("code", equalTo(200))
+                .body("data.name", equalTo(updatedName))
+        ;
+    }
+
+    @Test(dependsOnMethods = "updatingUser")
     public void deletingUser() {
         given()
                 .spec(givenReqSpec)
                 .when()
                 .delete("/" + id)
                 .then()
-                .log().body()
                 .spec(defaultTestsForResponse)
                 .body("code", equalTo(204));
         ;
