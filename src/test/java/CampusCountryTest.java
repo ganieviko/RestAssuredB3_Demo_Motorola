@@ -16,13 +16,13 @@ public class CampusCountryTest {
 
     private Cookies cookies;
     private List<String> idsForCleanedUp;
-    private Map<String, String> country;
+    private Map<String, String> body;
 
     @BeforeClass
     public void setUp() {
         RestAssured.baseURI = "https://test.campus.techno.study";
-        country = new HashMap<>();
-        country.put("name", "New country " + new Random().nextInt(500));
+        body = new HashMap<>();
+        body.put("name", "New country " + new Random().nextInt(500));
 
         Map<String, String> credentials = new HashMap<>();
         credentials.put("username", "daulet2030@gmail.com");
@@ -44,7 +44,7 @@ public class CampusCountryTest {
         idsForCleanedUp = new ArrayList<>(); // must be emptied
         ValidatableResponse response = given()
                 .cookies(cookies)
-                .body(country)
+                .body(body)
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
@@ -55,10 +55,25 @@ public class CampusCountryTest {
     }
 
     @Test()
+    public void getCountry() {
+        given()
+                .cookies(cookies)
+                .when()
+                .get("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("id", equalTo(idsForCleanedUp.get(0)))
+                .body("name", equalTo(body.get("name")))
+                .body("shortName", equalTo(body.get("shortName")))
+        ;
+    }
+
+    @Test()
     public void duplicateCountry() {
         given()
                 .cookies(cookies)
-                .body(country)
+                .body(body)
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
@@ -67,7 +82,7 @@ public class CampusCountryTest {
                 .statusCode(400)
                 .body("message", allOf(
                         not(empty()),
-                        containsString(country.get("name")),
+                        containsString(body.get("name")),
                         containsString("already exists"))
                 );
 
