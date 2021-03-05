@@ -158,6 +158,27 @@ public class CampusCountryTest {
     }
     // a country is deleted
 
+    @Test
+    public void deleteAfterDeleting(){
+        given()
+                .cookies(cookies)
+                .when()
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .then()
+                .statusCode(200)
+        ;
+
+        given()
+                .cookies(cookies)
+                .when()
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .then()
+                .statusCode(404)
+        ;
+
+        idsForCleanedUp.remove(0);
+    }
+
     @AfterMethod
     public void cleanup() {
         for (String id : idsForCleanedUp) {
