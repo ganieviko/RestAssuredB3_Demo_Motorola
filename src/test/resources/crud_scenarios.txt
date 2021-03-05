@@ -1,6 +1,6 @@
 create <= then success => deleting 1                                                                =done
 create <= then create again with same body the fail (duplicate) => deleting 1                       =done
-create <= then edit then success => deleting 1
+create <= then edit then success => deleting 1                                                      =done
 create <= then edit then edit again the success => deleting 1
 create <= then delete then create again then success => deleting 1
 create <= then delete then delete again then fail => deleting 0
