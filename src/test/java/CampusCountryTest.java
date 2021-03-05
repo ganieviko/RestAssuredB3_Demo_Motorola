@@ -45,7 +45,7 @@ public class CampusCountryTest {
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
-                .then().log().body();
+                .then();
 
         String id = response.statusCode(201).extract().jsonPath().getString("id");
         idsForCleanedUp.add(id);
@@ -132,6 +132,31 @@ public class CampusCountryTest {
                 .body("name", equalTo(editedBody.get("name")))
         ;
     }
+
+    // a country is created
+    @Test
+    public void createAfterDeleteTest() {
+        given()
+                .cookies(cookies)
+                .when()
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .then()
+                .statusCode(200)
+        ;
+        idsForCleanedUp.remove(0);
+
+        String newId = given()
+                .cookies(cookies)
+                .body(body)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/school-service/api/countries")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath().getString("id");
+        idsForCleanedUp.add(newId);
+    }
+    // a country is deleted
 
     @AfterMethod
     public void cleanup() {
