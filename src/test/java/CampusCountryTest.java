@@ -179,6 +179,23 @@ public class CampusCountryTest {
         idsForCleanedUp.remove(0);
     }
 
+//    @Test
+//    public void editDuplicateTest() {
+//        HashMap<String, String> newBody = new HashMap<>();
+//        newBody.put("name", "Very New country " + new Random().nextInt(500));
+//
+//        String newId = given()
+//                .cookies(cookies)
+//                .body(newBody)
+//                .contentType(ContentType.JSON)
+//                .when()
+//                .post("/school-service/api/countries")
+//                .then()
+//                .statusCode(201)
+//                .extract().jsonPath().getString("id");
+//        idsForCleanedUp.add(newId);
+//    }
+
     @AfterMethod
     public void cleanup() {
         for (String id : idsForCleanedUp) {
