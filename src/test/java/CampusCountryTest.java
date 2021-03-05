@@ -2,6 +2,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
 import io.restassured.response.ValidatableResponse;
+import org.junit.Assert;
 import org.testng.annotations.*;
 
 import java.util.*;
@@ -232,6 +233,67 @@ public class CampusCountryTest {
                 .body("[0].name", equalTo(body.get("name")))
                 .body("[0].id", equalTo(idsForCleanedUp.get(0)))
         ;
+    }
+
+    @Test
+    public void searchAfterDeletedTest() {
+        given()
+                .cookies(cookies)
+                .when()
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .then()
+                .statusCode(200)
+        ;
+        idsForCleanedUp.remove(0);
+
+        Map<String, String> searchBody = new HashMap<>();
+        searchBody.put("name", body.get("name"));
+
+        given()
+                .body(searchBody)
+                .log().body()
+                .cookies(cookies)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/school-service/api/countries/search")
+                .then()
+                .statusCode(200)
+                .body("$", empty())
+        ;
+    }
+
+    @Test
+    public void partialSearchAfterDeletedTest() {
+        given()
+                .cookies(cookies)
+                .when()
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .then()
+                .statusCode(200)
+        ;
+        idsForCleanedUp.remove(0);
+
+        Map<String, String> searchBody = new HashMap<>();
+        searchBody.put("name", body.get("name").substring(0, body.get("name").length()/2));
+
+        List<Map<String, String>> list = given()
+                .body(searchBody)
+                .cookies(cookies)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/school-service/api/countries/search")
+                .then()
+                .statusCode(200)
+                .extract().as(List.class);
+
+        boolean found = false;
+        for (Map<String, String> o: list) {
+            if(o.get("name").equals(body.get("name")) || o.get("id").equals(body.get("id"))) {
+                found = true;
+            }
+        }
+
+        Assert.assertFalse("I should not be able to find deleted country", found);
     }
 
     @AfterMethod
