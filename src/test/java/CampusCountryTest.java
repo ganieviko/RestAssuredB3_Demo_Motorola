@@ -179,22 +179,39 @@ public class CampusCountryTest {
         idsForCleanedUp.remove(0);
     }
 
-//    @Test
-//    public void editDuplicateTest() {
-//        HashMap<String, String> newBody = new HashMap<>();
-//        newBody.put("name", "Very New country " + new Random().nextInt(500));
-//
-//        String newId = given()
-//                .cookies(cookies)
-//                .body(newBody)
-//                .contentType(ContentType.JSON)
-//                .when()
-//                .post("/school-service/api/countries")
-//                .then()
-//                .statusCode(201)
-//                .extract().jsonPath().getString("id");
-//        idsForCleanedUp.add(newId);
-//    }
+    @Test
+    public void editDuplicateTest() {
+        HashMap<String, String> newBody = new HashMap<>();
+        newBody.put("name", "Very New country " + new Random().nextInt(500));
+
+        String newId = given()
+                .cookies(cookies)
+                .body(newBody)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/school-service/api/countries")
+                .then()
+                .statusCode(201)
+                .extract().jsonPath().getString("id");
+        idsForCleanedUp.add(newId);
+
+        HashMap<String, String> newEditBody = new HashMap<>();
+        newEditBody.put("id", newId);  // editing newly created country
+        newEditBody.put("name", body.get("name")); // it's a name that already exists
+        given()
+                .cookies(cookies)
+                .body(newEditBody)
+                .contentType(ContentType.JSON)
+                .when()
+                .put("/school-service/api/countries")
+                .then()
+                .statusCode(400)
+                .body("message", allOf(
+                not(empty()),
+                containsString(body.get("name")),
+                containsString("already exists"))
+        );
+    }
 
     @AfterMethod
     public void cleanup() {
