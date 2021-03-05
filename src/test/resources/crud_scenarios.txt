@@ -1,7 +1,7 @@
-create <= then get then success => deleting 1                                                                =done
+create <= then get then success => deleting 1                                                       =done
 create <= then create again with same body the fail (duplicate) => deleting 1                       =done
 create <= then edit then success => deleting 1                                                      =done
-create <= then edit then edit again the success => deleting 1
+create <= then edit then edit again the success => deleting 1                                       =done
 create <= then delete then create again then success => deleting 1
 create <= then delete then delete again then fail => deleting 0
 create <= with name1, then create with name2 then edit name2 to name1 then fail => deleting 2
