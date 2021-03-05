@@ -19,8 +19,7 @@ public class CampusCountryTest {
     @BeforeClass
     public void setUp() {
         RestAssured.baseURI = "https://test.campus.techno.study";
-        body = new HashMap<>();
-        body.put("name", "New country " + new Random().nextInt(500));
+
 
         Map<String, String> credentials = new HashMap<>();
         credentials.put("username", "daulet2030@gmail.com");
@@ -40,6 +39,9 @@ public class CampusCountryTest {
     @BeforeMethod
     public void createCountry() {
         idsForCleanedUp = new ArrayList<>(); // must be emptied
+        body = new HashMap<>();
+        body.put("name", "New country " + new Random().nextInt(10000));
+
         ValidatableResponse response = given()
                 .cookies(cookies)
                 .body(body)
