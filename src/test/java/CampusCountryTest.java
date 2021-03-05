@@ -103,6 +103,36 @@ public class CampusCountryTest {
         ;
     }
 
+    @Test
+    public void doubleEditTest() {
+        HashMap<String, String> editedBody = new HashMap<>();
+        editedBody.put("id", idsForCleanedUp.get(0));
+        editedBody.put("name", "Edited country " + new Random().nextInt(500));
+
+        given()
+                .cookies(cookies)
+                .body(editedBody)
+                .contentType(ContentType.JSON)
+                .when()
+                .put("/school-service/api/countries")
+                .then()
+                .statusCode(200)
+                .body("name", equalTo(editedBody.get("name")))
+        ;
+
+        editedBody.put("name", "Double Edited country " + new Random().nextInt(500));
+        given()
+                .cookies(cookies)
+                .body(editedBody)
+                .contentType(ContentType.JSON)
+                .when()
+                .put("/school-service/api/countries")
+                .then()
+                .statusCode(200)
+                .body("name", equalTo(editedBody.get("name")))
+        ;
+    }
+
     @AfterMethod
     public void cleanup() {
         for (String id : idsForCleanedUp) {
