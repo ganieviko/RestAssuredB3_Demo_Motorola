@@ -7,9 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
@@ -17,7 +15,7 @@ import static org.hamcrest.Matchers.*;
 public class CampusCountryTest {
 
     private Cookies cookies;
-    private String id;
+    private List<String> idsForCleanedUp;
     private Map<String, String> country;
 
     @BeforeClass
@@ -43,6 +41,7 @@ public class CampusCountryTest {
 
     @BeforeMethod
     public void createCountry() {
+        idsForCleanedUp = new ArrayList<>(); // must be emptied
         ValidatableResponse response = given()
                 .cookies(cookies)
                 .body(country)
@@ -51,7 +50,8 @@ public class CampusCountryTest {
                 .post("/school-service/api/countries")
                 .then();
 
-        id = response.statusCode(201).extract().jsonPath().getString("id");
+        String id = response.statusCode(201).extract().jsonPath().getString("id");
+        idsForCleanedUp.add(id);
     }
 
     @Test()
@@ -76,12 +76,14 @@ public class CampusCountryTest {
 
     @AfterClass
     public void cleanup() {
-        given()
-                .cookies(cookies)
-                .when()
-                .delete("/school-service/api/countries/" + id)
-                .then()
-                .statusCode(200)
-        ;
+        for (String id : idsForCleanedUp) {
+            given()
+                    .cookies(cookies)
+                    .when()
+                    .delete("/school-service/api/countries/" + id)
+                    .then()
+                    .statusCode(200)
+            ;
+        }
     }
 }
