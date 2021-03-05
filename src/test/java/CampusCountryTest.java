@@ -159,7 +159,7 @@ public class CampusCountryTest {
     // a country is deleted
 
     @Test
-    public void deleteAfterDeleting(){
+    public void deleteAfterDeleting() {
         given()
                 .cookies(cookies)
                 .when()
@@ -207,10 +207,31 @@ public class CampusCountryTest {
                 .then()
                 .statusCode(400)
                 .body("message", allOf(
-                not(empty()),
-                containsString(body.get("name")),
-                containsString("already exists"))
-        );
+                        not(empty()),
+                        containsString(body.get("name")),
+                        containsString("already exists"))
+                );
+    }
+
+    @Test
+    public void searchTest() {
+        Map<String, String> searchBody = new HashMap<>();
+        searchBody.put("name", body.get("name"));
+
+        given()
+                .body(searchBody)
+                .cookies(cookies)
+                .contentType(ContentType.JSON)
+                .when()
+                .post("/school-service/api/countries/search")
+                .then()
+                .log().body()
+                .statusCode(200)
+                .body("name", contains(body.get("name")))
+                .body("id", contains(idsForCleanedUp.get(0)))
+                .body("[0].name", equalTo(body.get("name")))
+                .body("[0].id", equalTo(idsForCleanedUp.get(0)))
+        ;
     }
 
     @AfterMethod
