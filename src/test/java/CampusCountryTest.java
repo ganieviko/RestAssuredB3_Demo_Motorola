@@ -2,10 +2,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
 import io.restassured.response.ValidatableResponse;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.util.*;
 
@@ -48,7 +45,7 @@ public class CampusCountryTest {
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
-                .then();
+                .then().log().body();
 
         String id = response.statusCode(201).extract().jsonPath().getString("id");
         idsForCleanedUp.add(id);
@@ -61,7 +58,6 @@ public class CampusCountryTest {
                 .when()
                 .get("/school-service/api/countries/" + idsForCleanedUp.get(0))
                 .then()
-                .log().body()
                 .statusCode(200)
                 .body("id", equalTo(idsForCleanedUp.get(0)))
                 .body("name", equalTo(body.get("name")))
@@ -89,7 +85,17 @@ public class CampusCountryTest {
 
     }
 
-    @AfterClass
+//    @Test()
+//    public void editTest() {
+//        given()
+//                .cookies(cookies)
+//                .body(body)
+//                .contentType(ContentType.JSON)
+//                .when()
+//                .put("/school-service/api/countries")
+//    }
+
+    @AfterMethod
     public void cleanup() {
         for (String id : idsForCleanedUp) {
             given()
