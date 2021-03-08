@@ -13,8 +13,8 @@ import static org.hamcrest.Matchers.*;
 public class CampusCountryTest {
 
     private Cookies cookies;
-    private List<String> idsForCleanedUp;
-    private Map<String, String> body;
+    private ThreadLocal<List<String>> idsForCleanedUp = new ThreadLocal<>();
+    private ThreadLocal<Map<String, String>> body = new ThreadLocal<>();
 
     @BeforeClass
     public void setUp() {
@@ -38,20 +38,20 @@ public class CampusCountryTest {
 
     @BeforeMethod
     public void createCountry() {
-        idsForCleanedUp = new ArrayList<>(); // must be emptied
-        body = new HashMap<>();
-        body.put("name", "New country " + new Random().nextInt(10000));
+        idsForCleanedUp.set(new ArrayList<>()); // must be emptied
+        body.set(new HashMap<>());
+        body.get().put("name", "New country " + new Random().nextInt(10000));
 
         ValidatableResponse response = given()
                 .cookies(cookies)
-                .body(body)
+                .body(body.get())
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
                 .then();
 
         String id = response.statusCode(201).extract().jsonPath().getString("id");
-        idsForCleanedUp.add(id);
+        idsForCleanedUp.get().add(id);
     }
 
     @Test()
@@ -59,12 +59,12 @@ public class CampusCountryTest {
         given()
                 .cookies(cookies)
                 .when()
-                .get("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .get("/school-service/api/countries/" + idsForCleanedUp.get().get(0))
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(idsForCleanedUp.get(0)))
-                .body("name", equalTo(body.get("name")))
-                .body("shortName", equalTo(body.get("shortName")))
+                .body("id", equalTo(idsForCleanedUp.get().get(0)))
+                .body("name", equalTo(body.get().get("name")))
+                .body("shortName", equalTo(body.get().get("shortName")))
         ;
     }
 
@@ -72,7 +72,7 @@ public class CampusCountryTest {
     public void duplicateCountry() {
         given()
                 .cookies(cookies)
-                .body(body)
+                .body(body.get())
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
@@ -81,7 +81,7 @@ public class CampusCountryTest {
                 .statusCode(400)
                 .body("message", allOf(
                         not(empty()),
-                        containsString(body.get("name")),
+                        containsString(body.get().get("name")),
                         containsString("already exists"))
                 );
 
@@ -91,7 +91,7 @@ public class CampusCountryTest {
     @Test()
     public void editTest() {
         HashMap<String, String> editedBody = new HashMap<>();
-        editedBody.put("id", idsForCleanedUp.get(0));
+        editedBody.put("id", idsForCleanedUp.get().get(0));
         editedBody.put("name", "Edited country " + new Random().nextInt(500));
 
         given()
@@ -109,7 +109,7 @@ public class CampusCountryTest {
     @Test
     public void doubleEditTest() {
         HashMap<String, String> editedBody = new HashMap<>();
-        editedBody.put("id", idsForCleanedUp.get(0));
+        editedBody.put("id", idsForCleanedUp.get().get(0));
         editedBody.put("name", "Edited country " + new Random().nextInt(500));
 
         given()
@@ -142,22 +142,22 @@ public class CampusCountryTest {
         given()
                 .cookies(cookies)
                 .when()
-                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get().get(0))
                 .then()
                 .statusCode(200)
         ;
-        idsForCleanedUp.remove(0);
+        idsForCleanedUp.get().remove(0);
 
         String newId = given()
                 .cookies(cookies)
-                .body(body)
+                .body(body.get())
                 .contentType(ContentType.JSON)
                 .when()
                 .post("/school-service/api/countries")
                 .then()
                 .statusCode(201)
                 .extract().jsonPath().getString("id");
-        idsForCleanedUp.add(newId);
+        idsForCleanedUp.get().add(newId);
     }
     // a country is deleted
 
@@ -166,7 +166,7 @@ public class CampusCountryTest {
         given()
                 .cookies(cookies)
                 .when()
-                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get().get(0))
                 .then()
                 .statusCode(200)
         ;
@@ -174,12 +174,12 @@ public class CampusCountryTest {
         given()
                 .cookies(cookies)
                 .when()
-                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get().get(0))
                 .then()
                 .statusCode(404)
         ;
 
-        idsForCleanedUp.remove(0);
+        idsForCleanedUp.get().remove(0);
     }
 
     @Test
@@ -196,11 +196,11 @@ public class CampusCountryTest {
                 .then()
                 .statusCode(201)
                 .extract().jsonPath().getString("id");
-        idsForCleanedUp.add(newId);
+        idsForCleanedUp.get().add(newId);
 
         HashMap<String, String> newEditBody = new HashMap<>();
         newEditBody.put("id", newId);  // editing newly created country
-        newEditBody.put("name", body.get("name")); // it's a name that already exists
+        newEditBody.put("name", body.get().get("name")); // it's a name that already exists
         given()
                 .cookies(cookies)
                 .body(newEditBody)
@@ -211,7 +211,7 @@ public class CampusCountryTest {
                 .statusCode(400)
                 .body("message", allOf(
                         not(empty()),
-                        containsString(body.get("name")),
+                        containsString(body.get().get("name")),
                         containsString("already exists"))
                 );
     }
@@ -219,7 +219,7 @@ public class CampusCountryTest {
     @Test
     public void searchTest() {
         Map<String, String> searchBody = new HashMap<>();
-        searchBody.put("name", body.get("name"));
+        searchBody.put("name", body.get().get("name"));
 
         given()
                 .body(searchBody)
@@ -230,10 +230,10 @@ public class CampusCountryTest {
                 .then()
                 .log().body()
                 .statusCode(200)
-                .body("name", contains(body.get("name")))
-                .body("id", contains(idsForCleanedUp.get(0)))
-                .body("[0].name", equalTo(body.get("name")))
-                .body("[0].id", equalTo(idsForCleanedUp.get(0)))
+                .body("name", contains(body.get().get("name")))
+                .body("id", contains(idsForCleanedUp.get().get(0)))
+                .body("[0].name", equalTo(body.get().get("name")))
+                .body("[0].id", equalTo(idsForCleanedUp.get().get(0)))
         ;
     }
 
@@ -242,14 +242,14 @@ public class CampusCountryTest {
         given()
                 .cookies(cookies)
                 .when()
-                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get().get(0))
                 .then()
                 .statusCode(200)
         ;
-        idsForCleanedUp.remove(0);
+        idsForCleanedUp.get().remove(0);
 
         Map<String, String> searchBody = new HashMap<>();
-        searchBody.put("name", body.get("name"));
+        searchBody.put("name", body.get().get("name"));
 
         given()
                 .body(searchBody)
@@ -269,14 +269,14 @@ public class CampusCountryTest {
         given()
                 .cookies(cookies)
                 .when()
-                .delete("/school-service/api/countries/" + idsForCleanedUp.get(0))
+                .delete("/school-service/api/countries/" + idsForCleanedUp.get().get(0))
                 .then()
                 .statusCode(200)
         ;
-        idsForCleanedUp.remove(0);
+        idsForCleanedUp.get().remove(0);
 
         Map<String, String> searchBody = new HashMap<>();
-        searchBody.put("name", body.get("name").substring(0, body.get("name").length()/2));
+        searchBody.put("name", body.get().get("name").substring(0, body.get().get("name").length()/2));
 
         List<Map<String, String>> list = given()
                 .body(searchBody)
@@ -290,7 +290,7 @@ public class CampusCountryTest {
 
         boolean found = false;
         for (Map<String, String> o: list) {
-            if(o.get("name").equals(body.get("name")) || o.get("id").equals(body.get("id"))) {
+            if(o.get("name").equals(body.get().get("name")) || o.get("id").equals(body.get().get("id"))) {
                 found = true;
             }
         }
@@ -300,7 +300,7 @@ public class CampusCountryTest {
 
     @AfterMethod
     public void cleanup() {
-        for (String id : idsForCleanedUp) {
+        for (String id : idsForCleanedUp.get()) {
             given()
                     .cookies(cookies)
                     .when()
