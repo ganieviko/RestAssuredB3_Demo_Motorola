@@ -69,6 +69,7 @@ public class GoRestUsersTest {
     public void gettingUser() {
         GoRestUser user = given()
                 .when()
+                .log().uri()
                 .get("/" + id)
                 .then()
                 .spec(defaultTestsForResponse)
